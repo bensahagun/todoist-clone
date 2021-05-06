@@ -3,6 +3,7 @@ import Content from '../components/Content';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import AppContext from './context';
+import Tasks from '../features/tasks/Tasks';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -10,10 +11,12 @@ function App() {
 
   return (
     <AppContext.Provider value={{ sidebarOpen, setSidebarOpen, selectedTask, setSelectedTask }}>
-      <div className='app'>
+      <div className='app' style={{ display: 'flex' }}>
         <Header setSidebarOpen={setSidebarOpen} />
-        <Sidebar siebarOpen={sidebarOpen} />
-        <Content />
+        <Sidebar sidebarOpen={sidebarOpen} />
+        <Content>
+          <Tasks />
+        </Content>
       </div>
     </AppContext.Provider>
   );

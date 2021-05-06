@@ -118,15 +118,13 @@ export default function Sidebar() {
             </ListItemAvatar>
             <ListItemText disableTypography className={classes.listItemText} primary={task.name} />
             <ListItemSecondaryAction>
-              <Typography variant='p' className={classes.listItemSecondaryAction}>
-                1
-              </Typography>
+              <Typography className={classes.listItemSecondaryAction}>1</Typography>
             </ListItemSecondaryAction>
           </ListItem>
         ))}
       </List>
 
-      <Grid container alignItems='justify'>
+      <Grid container>
         <FormControlLabel
           onChange={({ target }) => setProjectCollapsed(target.checked)}
           control={
@@ -151,7 +149,7 @@ export default function Sidebar() {
       <Collapse in={projectCollapsed}>
         <List component='nav'>
           {projects.map((project) => (
-            <ListItem button className={classes.listItem}>
+            <ListItem key={project.name} button className={classes.listItem}>
               <ListItemAvatar className={classes.ListItemAvatar}>
                 <FiberManualRecord style={{ fontSize: '1rem' }} />
               </ListItemAvatar>
