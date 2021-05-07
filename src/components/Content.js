@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Toolbar, Box, Container, Grid, Typography, Button, Divider } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { MoreHoriz } from '@material-ui/icons';
+import clsx from 'clsx';
+import AppContext from '../app/context';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
     minHeight: '100vh',
     backgroundColor: theme.palette.background.paper,
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  sidebarOpen: {
+    marginLeft: -theme.custom.sidebarWidth,
   },
   container: {
     padding: '36px 55px 0px 55px',
@@ -18,8 +27,9 @@ const useStyles = makeStyles((theme) => ({
 export default function Content({ children }) {
   const theme = useTheme();
   const classes = useStyles(theme);
+  const { sidebarOpen } = useContext(AppContext);
 
-  return <Box className={classes.root}>{children}</Box>;
+  return <Box className={clsx(classes.root, !sidebarOpen && classes.sidebarOpen)}>{children}</Box>;
 }
 
 Content.Header = function ContentHeader({ title, children, ...props }) {

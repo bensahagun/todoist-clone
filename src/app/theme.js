@@ -19,4 +19,7 @@ export const theme = createMuiTheme({
       minHeight: 44,
     },
   },
+  custom: {
+    sidebarWidth: 305,
+  },
 });

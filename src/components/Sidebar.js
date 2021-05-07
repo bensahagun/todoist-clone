@@ -19,11 +19,9 @@ import AppContext from '../app/context';
 import { taskFilters } from '../app/constants';
 import { Add, FiberManualRecord, KeyboardArrowDown, KeyboardArrowRight } from '@material-ui/icons';
 
-const sidebarWidth = 305;
-
 const useStyles = makeStyles((theme) => ({
   drawer: {
-    width: sidebarWidth,
+    width: theme.custom.sidebarWidth,
     flexShrink: 0,
   },
   drawerHeader: {
@@ -32,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0, 1),
   },
   drawerPaper: {
-    width: sidebarWidth,
+    width: theme.custom.sidebarWidth,
     backgroundColor: theme.palette.background.default,
     borderRight: 'none',
     paddingTop: 35,
