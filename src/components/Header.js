@@ -37,8 +37,8 @@ const useStyles = makeStyles((theme) => ({
     '&$switchChecked': {
       color: theme.palette.grey[700],
     },
-    '&$switchChecked + $track': {
-      backgroundColor: 'black',
+    '&$switchChecked + $switchTrack': {
+      backgroundColor: theme.palette.grey[700],
     },
   },
   switchChecked: {},

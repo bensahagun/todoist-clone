@@ -1,46 +1,162 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { db } from '../../firebase';
-import { addTask, addTaskAsync, fetchTasksAsync } from './tasksSlice';
+import { Container, Box, Button, Paper, FormGroup, Input, FormControl } from '@material-ui/core';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import moment from 'moment';
+import { Add, Inbox, Schedule } from '@material-ui/icons';
+import { addTask } from './tasksSlice';
 
-export default function Tasks() {
+const useStyles = makeStyles((theme) => ({
+  root: {},
+  addTask: {},
+  addTaskButton: {
+    fontSize: '0.9rem',
+    justifyContent: 'flex-start',
+    textTransform: 'initial',
+    color: theme.palette.grey[600],
+    '&:hover': {
+      backgroundColor: 'transparent',
+      color: theme.palette.primary.main,
+    },
+    '&:hover  $addTaskButtonIcon': {
+      background: theme.palette.primary.main,
+      color: theme.palette.common.white,
+      borderRadius: '50%',
+    },
+  },
+  addTaskButtonIcon: {
+    color: theme.palette.primary.main,
+  },
+  addTaskPanel: {
+    margin: theme.spacing(1, 1),
+    padding: theme.spacing(1, 2),
+    boxSizing: 'border-box',
+  },
+  addTaskInput: {
+    outline: 'none',
+    '&:before, &:after': {
+      display: 'none',
+    },
+  },
+  addTaskOptions: {},
+  addTaskOptionButton: {
+    fontSize: '0.75rem',
+    textTransform: 'capitalize',
+    '& + $addTaskOptionButton': {
+      marginLeft: theme.spacing(1),
+    },
+    '& $addTaskOptionIcons svg': {
+      fontSize: '1rem',
+    },
+  },
+  addTaskOptionIcons: {
+    marginRight: theme.spacing(0.75),
+    color: theme.palette.grey[600],
+  },
+  addTaskActions: {
+    margin: theme.spacing(1, 1),
+  },
+  addTaskActionButton: {
+    textTransform: 'inherit',
+    fontWeight: '600',
+    '& + $addTaskActionButton': {
+      marginLeft: theme.spacing(1),
+    },
+  },
+}));
+
+export default function Tasks({ ...props }) {
   const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //   db.collection('tasks').onSnapshot((snapshot) => {
-  //     snapshot.docs.forEach((doc) => {
-  //       const task = {
-  //         id: doc.id,
-  //         ...doc.data(),
-  //       };
-  //       dispatch(addTask(task));
-  //     });
-  //   });
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  const theme = useTheme();
+  const classes = useStyles(theme);
 
   return (
-    <div>
-      <button
-        onClick={() => {
-          dispatch(
-            addTaskAsync({
-              dateCreated: moment().format('MM/DD/YYYY'),
-              title: 'This is a video',
-              projectId: 1,
-              userId: 'BcwG2ysWo37vag',
-            })
-          );
-        }}>
-        Async Add
-      </button>
-      <button
-        onClick={() => {
-          dispatch(fetchTasksAsync());
-        }}>
-        Fetch
-      </button>
-    </div>
+    <Box {...props} className={classes.root}>
+      <Container maxWidth='md'>
+        <Tasks.AddTask />
+      </Container>
+    </Box>
   );
 }
+
+Tasks.AddTask = function TasksAddTask() {
+  const theme = useTheme();
+  const classes = useStyles(theme);
+  const [addTaskActive, setAddTaskActive] = useState(false);
+  const [formValid, setFormValid] = useState(false);
+
+  return (
+    <Box className={classes.addTask}>
+      <Container maxWidth='md'>
+        {!addTaskActive && (
+          <Button
+            classes={{
+              root: classes.addTaskButton,
+              startIcon: classes.addTaskButtonIcon,
+            }}
+            onClick={() => setAddTaskActive(true)}
+            startIcon={<Add />}
+            fullWidth={true}
+            disableRipple>
+            Add task
+          </Button>
+        )}
+        {addTaskActive && (
+          <>
+            <Paper className={classes.addTaskPanel} variant='outlined'>
+              <FormControl component='fieldset' fullWidth={true}>
+                <Input
+                  onChange={({ target }) => setFormValid(target.value.length > 2)}
+                  className={classes.addTaskInput}
+                  type='text'
+                  placeholder='e.g. Designer meeting at  11am'
+                />
+
+                <FormGroup row={true} spacing={1}>
+                  <Button
+                    disableRipple
+                    variant='outlined'
+                    classes={{
+                      root: classes.addTaskOptionButton,
+                      startIcon: classes.addTaskOptionIcons,
+                    }}
+                    startIcon={<Schedule />}>
+                    Schedule
+                  </Button>
+                  <Button
+                    disableRipple
+                    variant='outlined'
+                    classes={{
+                      root: classes.addTaskOptionButton,
+                      startIcon: classes.addTaskOptionIcons,
+                    }}
+                    startIcon={<Inbox style={{ color: '#246fe0' }} />}>
+                    Inbox
+                  </Button>
+                </FormGroup>
+              </FormControl>
+            </Paper>
+            <FormControl className={classes.addTaskActions}>
+              <FormGroup row={true}>
+                <Button
+                  disabled={!formValid}
+                  className={classes.addTaskActionButton}
+                  variant='contained'
+                  color='primary'>
+                  Add task
+                </Button>
+                <Button
+                  size='small'
+                  onClick={() => setAddTaskActive(false)}
+                  className={classes.addTaskActionButton}
+                  variant='outlined'>
+                  Cancel
+                </Button>
+              </FormGroup>
+            </FormControl>
+          </>
+        )}
+      </Container>
+    </Box>
+  );
+};

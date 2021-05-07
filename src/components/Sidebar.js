@@ -16,7 +16,7 @@ import {
   Button,
 } from '@material-ui/core';
 import AppContext from '../app/context';
-import { tasks } from '../app/constants';
+import { taskFilters } from '../app/constants';
 import { Add, FiberManualRecord, KeyboardArrowDown, KeyboardArrowRight } from '@material-ui/icons';
 
 const sidebarWidth = 305;
@@ -93,7 +93,7 @@ const projects = [{ name: 'Meetings 🤝' }, { name: 'Health 💉' }, { name: 'H
 export default function Sidebar() {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const { sidebarOpen, selectedTask, setSelectedTask } = useContext(AppContext);
+  const { sidebarOpen, selectedTaskFilter, setSelectedTaskFilter } = useContext(AppContext);
   const [projectCollapsed, setProjectCollapsed] = useState(true);
 
   return (
@@ -106,17 +106,17 @@ export default function Sidebar() {
       }}>
       <Toolbar />
       <List component='nav' className={classes.list}>
-        {tasks.map((task) => (
+        {taskFilters.map((filter) => (
           <ListItem
             button
-            key={task.key}
+            key={filter.key}
             className={classes.listItem}
-            onClick={() => setSelectedTask(task.key)}
-            selected={task.key === selectedTask ? true : false}>
-            <ListItemAvatar className={classes.ListItemAvatar} style={{ color: task.color }}>
-              {task.icon}
+            onClick={() => setSelectedTaskFilter(filter.key)}
+            selected={filter.key === selectedTaskFilter ? true : false}>
+            <ListItemAvatar className={classes.ListItemAvatar} style={{ color: filter.color }}>
+              {filter.icon}
             </ListItemAvatar>
-            <ListItemText disableTypography className={classes.listItemText} primary={task.name} />
+            <ListItemText disableTypography className={classes.listItemText} primary={filter.name} />
             <ListItemSecondaryAction>
               <Typography className={classes.listItemSecondaryAction}>1</Typography>
             </ListItemSecondaryAction>

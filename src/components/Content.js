@@ -19,14 +19,21 @@ export default function Content({ children }) {
   const theme = useTheme();
   const classes = useStyles(theme);
 
+  return <Box className={classes.root}>{children}</Box>;
+}
+
+Content.Header = function ContentHeader({ title, children, ...props }) {
+  const theme = useTheme();
+  const classes = useStyles(theme);
+
   return (
-    <Box className={classes.root}>
+    <Box {...props}>
       <Toolbar />
       <Container className={classes.container} maxWidth='md'>
         <Grid className={classes.headerGrid} container alignContent='space-between'>
           <Grid item xs>
             <Typography component='h1' variant='h5'>
-              <Box fontWeight='600'>Inbox</Box>
+              <Box fontWeight='600'>{title}</Box>
             </Typography>
           </Grid>
           <Grid item>
@@ -36,8 +43,11 @@ export default function Content({ children }) {
           </Grid>
         </Grid>
         <Divider />
-        {children}
       </Container>
     </Box>
   );
-}
+};
+
+Content.Body = function ContentBody({ children, ...props }) {
+  return <Box {...props}>{children}</Box>;
+};

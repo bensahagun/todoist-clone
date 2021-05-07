@@ -5,8 +5,11 @@ import { Provider } from 'react-redux';
 import { CssBaseline } from '@material-ui/core';
 import { StylesProvider, ThemeProvider } from '@material-ui/core/styles';
 import { store } from './app/store';
+import { fetchTasks } from './features/tasks/tasksSlice';
 import { theme } from './app/theme';
 import '@fontsource/roboto';
+
+store.dispatch(fetchTasks());
 
 ReactDOM.render(
   <React.StrictMode>
