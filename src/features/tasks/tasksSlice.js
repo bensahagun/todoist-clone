@@ -6,6 +6,7 @@ const initialState = [];
 export const fetchTasks = createAsyncThunk('firebase/fetchTasks', async () => {
   const response = await db
     .collection('tasks')
+    .orderBy('dateCreated')
     .get()
     .then((snapshot) => {
       return snapshot.docs.map((doc) => ({
@@ -27,6 +28,14 @@ export const addTask = createAsyncThunk('firebase/addTask', async (task) => {
   return response;
 });
 
+export const completeTask = createAsyncThunk('firebase/completeTask', async (taskId) => {
+  await db.collection('tasks').doc(taskId).update({
+    isCompleted: true,
+  });
+
+  return taskId;
+});
+
 export const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -42,8 +51,17 @@ export const tasksSlice = createSlice({
     [addTask.fulfilled]: (state, action) => {
       state.push(action.payload);
     },
+    [completeTask.fulfilled]: (state, action) => {
+      state.forEach((task) => {
+        if (task.id === action.payload) task.isCompleted = true;
+      });
+    },
   },
 });
+
+export const selectTasks = (state) => state.tasks;
+export const selectCompletedTasks = (state) => state.tasks.filter((task) => task.isCompleted);
+export const selectPendingTasks = (state) => state.tasks.filter((task) => !task.isCompleted);
 
 // export const { addTask } = tasksSlice.actions;
 

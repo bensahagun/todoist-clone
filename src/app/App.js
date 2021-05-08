@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Content from '../components/Content';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
-import { taskFilters } from './constants';
+import { taskFilters } from './fixtures';
 import AppContext from './context';
 import Tasks from '../features/tasks/Tasks';
 

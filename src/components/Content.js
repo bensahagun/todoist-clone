@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: -theme.custom.sidebarWidth,
   },
   container: {
-    padding: '36px 55px 0px 55px',
+    padding: theme.spacing(4, 8, 0),
   },
   headerGrid: {},
 }));

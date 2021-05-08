@@ -15,9 +15,9 @@ import {
   Grid,
   Button,
 } from '@material-ui/core';
-import AppContext from '../app/context';
-import { taskFilters } from '../app/constants';
 import { Add, FiberManualRecord, KeyboardArrowDown, KeyboardArrowRight } from '@material-ui/icons';
+import AppContext from '../app/context';
+import { taskFilters } from '../app/fixtures';
 
 const useStyles = makeStyles((theme) => ({
   drawer: {

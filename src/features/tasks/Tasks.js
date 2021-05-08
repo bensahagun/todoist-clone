@@ -1,94 +1,138 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { Container, Box, Button, Paper, FormGroup, Input, FormControl } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import moment from 'moment';
-import { Add, Inbox, Schedule } from '@material-ui/icons';
-import { addTask } from './tasksSlice';
-
-const useStyles = makeStyles((theme) => ({
-  root: {},
-  addTask: {},
-  addTaskButton: {
-    fontSize: '0.9rem',
-    justifyContent: 'flex-start',
-    textTransform: 'initial',
-    color: theme.palette.grey[600],
-    '&:hover': {
-      backgroundColor: 'transparent',
-      color: theme.palette.primary.main,
-    },
-    '&:hover  $addTaskButtonIcon': {
-      background: theme.palette.primary.main,
-      color: theme.palette.common.white,
-      borderRadius: '50%',
-    },
-  },
-  addTaskButtonIcon: {
-    color: theme.palette.primary.main,
-  },
-  addTaskPanel: {
-    margin: theme.spacing(1, 1),
-    padding: theme.spacing(1, 2),
-    boxSizing: 'border-box',
-  },
-  addTaskInput: {
-    outline: 'none',
-    '&:before, &:after': {
-      display: 'none',
-    },
-  },
-  addTaskOptions: {},
-  addTaskOptionButton: {
-    fontSize: '0.75rem',
-    textTransform: 'capitalize',
-    '& + $addTaskOptionButton': {
-      marginLeft: theme.spacing(1),
-    },
-    '& $addTaskOptionIcons svg': {
-      fontSize: '1rem',
-    },
-  },
-  addTaskOptionIcons: {
-    marginRight: theme.spacing(0.75),
-    color: theme.palette.grey[600],
-  },
-  addTaskActions: {
-    margin: theme.spacing(1, 1),
-  },
-  addTaskActionButton: {
-    textTransform: 'inherit',
-    fontWeight: '600',
-    '& + $addTaskActionButton': {
-      marginLeft: theme.spacing(1),
-    },
-  },
-}));
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Container,
+  Box,
+  Button,
+  Paper,
+  FormGroup,
+  Input,
+  FormControl,
+  List,
+  ListItem,
+  ListItemIcon,
+  Checkbox,
+  ListItemText,
+  Modal,
+  Typography,
+  Toolbar,
+  TextField,
+  Grid,
+} from '@material-ui/core';
+import { useTheme } from '@material-ui/core/styles';
+import { Add, Inbox, CheckCircleOutlined, RadioButtonUncheckedOutlined, Schedule, Close } from '@material-ui/icons';
+import clsx from 'clsx';
+import useStyles from './tasksStyles';
+import { getTimeStamp } from '../../firebase';
+import { selectPendingTasks, addTask, completeTask } from './tasksSlice';
+import { ToggleButton } from '@material-ui/lab';
 
 export default function Tasks({ ...props }) {
-  const dispatch = useDispatch();
   const theme = useTheme();
   const classes = useStyles(theme);
 
   return (
     <Box {...props} className={classes.root}>
-      <Container maxWidth='md'>
+      <Container maxWidth='md' className={classes.container}>
+        <Tasks.List />
         <Tasks.AddTask />
+        <Tasks.AddTasksModal />
       </Container>
     </Box>
   );
 }
 
-Tasks.AddTask = function TasksAddTask() {
+Tasks.List = function TasksList() {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const [addTaskActive, setAddTaskActive] = useState(false);
-  const [formValid, setFormValid] = useState(false);
+  const tasks = useSelector(selectPendingTasks);
+  const dispatch = useDispatch();
+
+  const handleCompleteTask = (taskId) => {
+    dispatch(completeTask(taskId));
+  };
 
   return (
-    <Box className={classes.addTask}>
-      <Container maxWidth='md'>
-        {!addTaskActive && (
+    <List className={classes.list}>
+      {tasks.map((task) => (
+        <ListItem className={classes.listItem} key={task.id} button disableRipple onClick={() => {}}>
+          <ListItemIcon className={classes.listItemIcon}>
+            <Checkbox
+              onChange={({ target }) => target.checked && handleCompleteTask(task.id)}
+              color='default'
+              checkedIcon={<CheckCircleOutlined />}
+              icon={<RadioButtonUncheckedOutlined />}
+              edge='start'
+              inputProps={{ 'aria-labelledby': task.id }}
+            />
+          </ListItemIcon>
+          <ListItemText
+            disableTypography
+            className={classes.listItemText}
+            id={task.id}
+            primary={task.title}></ListItemText>
+        </ListItem>
+      ))}
+    </List>
+  );
+};
+
+Tasks.AddTasksModal = function TasksAddTaskModal({ modalOpen = false, setModalOpen }) {
+  const theme = useTheme();
+  const classes = useStyles(theme);
+
+  return (
+    <Modal className={classes.addTaskModal} open={modalOpen} aria-labelledby='Add task'>
+      <Paper className={classes.addTaskModalPaper} elevation={1}>
+        <Toolbar className={classes.addTaskModalToolbar} disableGutters={true}>
+          <Typography>
+            <strong>Quick Add Task</strong>
+          </Typography>
+          <Button onClick={() => setModalOpen(false)} className={classes.addTaskModalClose} size='small'>
+            <Close />
+          </Button>
+        </Toolbar>
+        <Tasks.AddTask forModal={true} setModalOpen={setModalOpen} />
+      </Paper>
+    </Modal>
+  );
+};
+
+Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
+  const theme = useTheme();
+  const classes = useStyles(theme);
+  const [inputValue, setInputValue] = useState('');
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [scheduleInput, setScheduleInput] = useState('');
+  const [addTaskActive, setAddTaskActive] = useState(false);
+  const dispatch = useDispatch();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const task = {
+      title: inputValue,
+      isCompleted: false,
+      dueDate: scheduleInput,
+      projectId: 1,
+      userId: 'BcwG2ysWo37vag',
+      dateCreated: getTimeStamp(),
+    };
+
+    dispatch(addTask(task)).then(() => {
+      setInputValue('');
+    });
+  };
+
+  const handleCancel = () => {
+    setAddTaskActive(false);
+    forModal && setModalOpen(false);
+  };
+
+  return (
+    <Box className={clsx(classes.addTask, forModal && classes.addTaskForModal)}>
+      <Container className={classes.addTaskContainer} forModalmaxWidth='md'>
+        {!addTaskActive && !forModal && (
           <Button
             classes={{
               root: classes.addTaskButton,
@@ -101,28 +145,56 @@ Tasks.AddTask = function TasksAddTask() {
             Add task
           </Button>
         )}
-        {addTaskActive && (
-          <>
+        {(addTaskActive || forModal) && (
+          <form onSubmit={handleSubmit}>
             <Paper className={classes.addTaskPanel} variant='outlined'>
-              <FormControl component='fieldset' fullWidth={true}>
-                <Input
-                  onChange={({ target }) => setFormValid(target.value.length > 2)}
-                  className={classes.addTaskInput}
-                  type='text'
-                  placeholder='e.g. Designer meeting at  11am'
-                />
-
-                <FormGroup row={true} spacing={1}>
-                  <Button
-                    disableRipple
-                    variant='outlined'
+              <Input
+                autoFocus
+                value={inputValue}
+                onChange={({ target }) => {
+                  setInputValue(target.value);
+                }}
+                className={classes.addTaskInput}
+                type='text'
+                placeholder='e.g. Meeting with Ben at 11am'
+                fullWidth
+              />
+              <Grid container spacing={1}>
+                <Grid item>
+                  <ToggleButton
+                    value='check'
                     classes={{
-                      root: classes.addTaskOptionButton,
-                      startIcon: classes.addTaskOptionIcons,
+                      root: classes.addTaskOptionToggle,
+                      selected: classes.addTaskOptionToggleSelected,
                     }}
-                    startIcon={<Schedule />}>
-                    Schedule
-                  </Button>
+                    selected={isScheduled}
+                    onChange={() => setIsScheduled(!isScheduled)}>
+                    <Schedule style={{ fontSize: '1rem' }} />
+                  </ToggleButton>
+                </Grid>
+                {isScheduled && (
+                  <Grid item>
+                    <TextField
+                      className={classes.addTaskOptionDate}
+                      variant='outlined'
+                      size='small'
+                      autoFocus
+                      type='date'
+                      label='Due date'
+                      InputProps={{
+                        classes: {
+                          root: classes.addTaskOptionDateInput,
+                        },
+                        min: new Date().toLocaleDateString('en-CA'),
+                      }}
+                      defaultValue={new Date().toLocaleDateString('en-CA')}
+                      onChange={({ target }) => {
+                        setScheduleInput(target.value);
+                      }}
+                    />
+                  </Grid>
+                )}
+                <Grid item>
                   <Button
                     disableRipple
                     variant='outlined'
@@ -133,28 +205,25 @@ Tasks.AddTask = function TasksAddTask() {
                     startIcon={<Inbox style={{ color: '#246fe0' }} />}>
                     Inbox
                   </Button>
-                </FormGroup>
-              </FormControl>
+                </Grid>
+              </Grid>
             </Paper>
             <FormControl className={classes.addTaskActions}>
               <FormGroup row={true}>
                 <Button
-                  disabled={!formValid}
+                  type='submit'
+                  disabled={inputValue.length < 2}
                   className={classes.addTaskActionButton}
                   variant='contained'
                   color='primary'>
                   Add task
                 </Button>
-                <Button
-                  size='small'
-                  onClick={() => setAddTaskActive(false)}
-                  className={classes.addTaskActionButton}
-                  variant='outlined'>
+                <Button size='small' onClick={handleCancel} className={classes.addTaskActionButton}>
                   Cancel
                 </Button>
               </FormGroup>
             </FormControl>
-          </>
+          </form>
         )}
       </Container>
     </Box>

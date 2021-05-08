@@ -22,4 +22,13 @@ export const theme = createMuiTheme({
   custom: {
     sidebarWidth: 305,
   },
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        html: {
+          overflow: 'hidden',
+        },
+      },
+    },
+  },
 });

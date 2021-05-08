@@ -1,8 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { AppBar, Toolbar, TextField, InputAdornment, Switch, Grid, Button } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Menu, Home, Search, Add, NightsStay, WbSunny } from '@material-ui/icons';
 import AppContext from '../app/context';
+import Tasks from '../features/tasks/Tasks';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -49,6 +50,7 @@ export default function Header() {
   const theme = useTheme();
   const classes = useStyles(theme);
   const { sidebarOpen, setSidebarOpen } = useContext(AppContext);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <AppBar elevation={0} className={classes.appBar}>
@@ -77,9 +79,11 @@ export default function Header() {
             />
           </Grid>
           <Grid item>
-            <Button className={classes.iconButton}>
+            <Button onClick={() => setModalOpen(!modalOpen)} className={classes.iconButton}>
               <Add style={{ fontSize: '1.4rem' }} />
             </Button>
+
+            <Tasks.AddTasksModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
 
             <Grid component='label'>
               <WbSunny fontSize='small' style={{ verticalAlign: 'middle' }} />
