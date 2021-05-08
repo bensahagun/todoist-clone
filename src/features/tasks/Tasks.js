@@ -18,14 +18,19 @@ import {
   Toolbar,
   TextField,
   Grid,
+  Dialog,
+  Select,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@material-ui/core';
 import { useTheme } from '@material-ui/core/styles';
 import { Add, Inbox, CheckCircleOutlined, RadioButtonUncheckedOutlined, Schedule, Close } from '@material-ui/icons';
 import clsx from 'clsx';
 import useStyles from './tasksStyles';
-import { getTimeStamp } from '../../firebase';
 import { selectPendingTasks, addTask, completeTask } from './tasksSlice';
 import { ToggleButton } from '@material-ui/lab';
+import { getDateToday, getServerDateTime } from '../../helpers';
 
 export default function Tasks({ ...props }) {
   const theme = useTheme();
@@ -101,11 +106,17 @@ Tasks.AddTasksModal = function TasksAddTaskModal({ modalOpen = false, setModalOp
 Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
   const theme = useTheme();
   const classes = useStyles(theme);
+  const [addTaskActive, setAddTaskActive] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduleInput, setScheduleInput] = useState('');
-  const [addTaskActive, setAddTaskActive] = useState(false);
+  const [assignedProject, setAssignedProject] = useState(1);
+  const [openProjectDialog, setOpenProjectDialog] = useState(false);
   const dispatch = useDispatch();
+
+  const handleSelectProject = () => {
+    setOpenProjectDialog(false);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -116,10 +127,12 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
       dueDate: scheduleInput,
       projectId: 1,
       userId: 'BcwG2ysWo37vag',
-      dateCreated: getTimeStamp(),
+      dateCreated: getServerDateTime(),
     };
 
     dispatch(addTask(task)).then(() => {
+      setScheduleInput(getDateToday());
+      setIsScheduled(false);
       setInputValue('');
     });
   };
@@ -185,9 +198,9 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
                         classes: {
                           root: classes.addTaskOptionDateInput,
                         },
-                        min: new Date().toLocaleDateString('en-CA'),
+                        min: getDateToday(),
                       }}
-                      defaultValue={new Date().toLocaleDateString('en-CA')}
+                      defaultValue={getDateToday()}
                       onChange={({ target }) => {
                         setScheduleInput(target.value);
                       }}
@@ -198,6 +211,7 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
                   <Button
                     disableRipple
                     variant='outlined'
+                    onClick={() => setOpenProjectDialog(true)}
                     classes={{
                       root: classes.addTaskOptionButton,
                       startIcon: classes.addTaskOptionIcons,
@@ -205,6 +219,28 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
                     startIcon={<Inbox style={{ color: '#246fe0' }} />}>
                     Inbox
                   </Button>
+                  <Dialog open={openProjectDialog} onClose={() => setOpenProjectDialog(false)}>
+                    <DialogTitle>Select assigned project</DialogTitle>
+                    <DialogContent>
+                      <Select
+                        native
+                        value={assignedProject}
+                        onChange={({ target }) => setAssignedProject(target.value)}
+                        input={<Input id='demo-dialog-native' />}>
+                        <option value={1}>One</option>
+                        <option value={2}>Two</option>
+                        <option value={3}>Three</option>
+                      </Select>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={() => setOpenProjectDialog(false)} color='primary'>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSelectProject} color='primary'>
+                        Ok
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </Grid>
               </Grid>
             </Paper>

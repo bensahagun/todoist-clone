@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   addTaskOptionDateInput: {
-    maxWidth: 130,
+    maxWidth: 135,
   },
   addTaskOptionButton: {
     fontSize: '0.75rem',
