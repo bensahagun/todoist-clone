@@ -1,14 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './app/App';
 import { Provider } from 'react-redux';
 import { CssBaseline } from '@material-ui/core';
 import { StylesProvider, ThemeProvider } from '@material-ui/core/styles';
+import '@fontsource/roboto';
 import { store } from './app/store';
 import { fetchTasks } from './features/tasks/tasksSlice';
+import { fetchProjects } from './features/projects/projectsSlice';
 import { theme } from './app/theme';
-import '@fontsource/roboto';
+import App from './app/App';
 
+store.dispatch(fetchProjects());
 store.dispatch(fetchTasks());
 
 ReactDOM.render(

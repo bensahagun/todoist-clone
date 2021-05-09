@@ -144,7 +144,7 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
 
   return (
     <Box className={clsx(classes.addTask, forModal && classes.addTaskForModal)}>
-      <Container className={classes.addTaskContainer} forModalmaxWidth='md'>
+      <Container className={classes.addTaskContainer}>
         {!addTaskActive && !forModal && (
           <Button
             classes={{
@@ -226,18 +226,16 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
                         native
                         value={assignedProject}
                         onChange={({ target }) => setAssignedProject(target.value)}
-                        input={<Input id='demo-dialog-native' />}>
+                        input={<Input />}>
                         <option value={1}>One</option>
                         <option value={2}>Two</option>
                         <option value={3}>Three</option>
                       </Select>
                     </DialogContent>
                     <DialogActions>
-                      <Button onClick={() => setOpenProjectDialog(false)} color='primary'>
-                        Cancel
-                      </Button>
+                      <Button onClick={() => setOpenProjectDialog(false)}>Cancel</Button>
                       <Button onClick={handleSelectProject} color='primary'>
-                        Ok
+                        <strong>Select</strong>
                       </Button>
                     </DialogActions>
                   </Dialog>

@@ -1,23 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import {
-  Drawer,
-  Toolbar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
-  Typography,
-  Checkbox,
-  Collapse,
-  FormControlLabel,
-  Grid,
-  Button,
-} from '@material-ui/core';
-import { Add, FiberManualRecord, KeyboardArrowDown, KeyboardArrowRight } from '@material-ui/icons';
+import { Drawer, Toolbar } from '@material-ui/core';
 import AppContext from '../app/context';
-import { taskFilters } from '../app/fixtures';
+import Projects from '../features/projects/Projects';
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -44,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 0,
     marginBottom: theme.spacing(2),
   },
-  ListItemAvatar: {
+  listItemAvatar: {
     minWidth: 30,
     color: theme.palette.grey[600],
     display: 'flex',
@@ -72,27 +57,12 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.grey[500],
     fontSize: '1.4rem',
   },
-  formControl: {
-    flexGrow: 1,
-    marginRight: 0,
-    marginLeft: theme.spacing(0.75),
-  },
-  checkBoxLabel: {
-    fontWeight: 'bold',
-  },
-  addProjectButton: {
-    minWidth: 40,
-    color: theme.palette.grey[500],
-  },
 }));
-
-const projects = [{ name: 'Meetings 🤝' }, { name: 'Health 💉' }, { name: 'House 🏠' }];
 
 export default function Sidebar() {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const { sidebarOpen, selectedTaskFilter, setSelectedTaskFilter } = useContext(AppContext);
-  const [projectCollapsed, setProjectCollapsed] = useState(true);
+  const { sidebarOpen } = useContext(AppContext);
 
   return (
     <Drawer
@@ -103,60 +73,7 @@ export default function Sidebar() {
         paper: classes.drawerPaper,
       }}>
       <Toolbar />
-      <List component='nav' className={classes.list}>
-        {taskFilters.map((filter) => (
-          <ListItem
-            button
-            key={filter.key}
-            className={classes.listItem}
-            onClick={() => setSelectedTaskFilter(filter.key)}
-            selected={filter.key === selectedTaskFilter ? true : false}>
-            <ListItemAvatar className={classes.ListItemAvatar} style={{ color: filter.color }}>
-              {filter.icon}
-            </ListItemAvatar>
-            <ListItemText disableTypography className={classes.listItemText} primary={filter.name} />
-            <ListItemSecondaryAction>
-              <Typography className={classes.listItemSecondaryAction}>1</Typography>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-
-      <Grid container>
-        <FormControlLabel
-          onChange={({ target }) => setProjectCollapsed(target.checked)}
-          control={
-            <Checkbox
-              icon={<KeyboardArrowRight className={classes.buttonIcon} />}
-              checkedIcon={<KeyboardArrowDown className={classes.buttonIcon} />}
-              name='projectCollapsed'
-            />
-          }
-          classes={{
-            root: classes.formControl,
-            label: classes.checkBoxLabel,
-          }}
-          checked={projectCollapsed}
-          label='Projects'
-        />
-        <Button className={classes.addProjectButton}>
-          <Add />
-        </Button>
-      </Grid>
-
-      <Collapse in={projectCollapsed}>
-        <List component='nav'>
-          {projects.map((project) => (
-            <ListItem key={project.name} button className={classes.listItem}>
-              <ListItemAvatar className={classes.ListItemAvatar}>
-                <FiberManualRecord style={{ fontSize: '1rem' }} />
-              </ListItemAvatar>
-
-              <ListItemText className={classes.listItemText} disableTypography primary={project.name} />
-            </ListItem>
-          ))}
-        </List>
-      </Collapse>
+      <Projects />
     </Drawer>
   );
 }

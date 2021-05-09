@@ -6,6 +6,7 @@ const initialState = [];
 export const fetchTasks = createAsyncThunk('firebase/fetchTasks', async () => {
   const response = await db
     .collection('tasks')
+    .where('isCompleted', '==', false)
     .orderBy('dateCreated')
     .get()
     .then((snapshot) => {
@@ -39,11 +40,7 @@ export const completeTask = createAsyncThunk('firebase/completeTask', async (tas
 export const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
-  reducers: {
-    // addTask: (state, action) => {
-    //   state.push(action.payload);
-    // },
-  },
+  reducers: {},
   extraReducers: {
     [fetchTasks.fulfilled]: (state, action) => {
       state.push(...action.payload);
