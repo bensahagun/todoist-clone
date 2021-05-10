@@ -117,6 +117,7 @@ Projects.Add = function ProjectsAdd({ ...props }) {
         <DialogTitle>Add new project</DialogTitle>
         <DialogContent>
           <TextField
+            fullWidth
             onChange={({ target }) => setProjectTitle(target.value)}
             placeholder='Name of project'
             type='text'

@@ -83,7 +83,7 @@ export default function Header() {
               <Add style={{ fontSize: '1.4rem' }} />
             </Button>
 
-            <Tasks.AddTasksModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
+            <Tasks.AddModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
 
             <Grid component='label'>
               <WbSunny fontSize='small' style={{ verticalAlign: 'middle' }} />

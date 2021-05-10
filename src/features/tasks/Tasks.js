@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Container,
@@ -31,6 +31,7 @@ import useStyles from './tasksStyles';
 import { selectPendingTasks, addTask, completeTask } from './tasksSlice';
 import { ToggleButton } from '@material-ui/lab';
 import { getDateToday, getServerDateTime } from '../../helpers';
+import { selectProjects } from '../projects/projectsSlice';
 
 export default function Tasks({ ...props }) {
   const theme = useTheme();
@@ -40,8 +41,8 @@ export default function Tasks({ ...props }) {
     <Box {...props} className={classes.root}>
       <Container maxWidth='md' className={classes.container}>
         <Tasks.List />
-        <Tasks.AddTask />
-        <Tasks.AddTasksModal />
+        <Tasks.Add />
+        <Tasks.AddModal />
       </Container>
     </Box>
   );
@@ -82,7 +83,7 @@ Tasks.List = function TasksList() {
   );
 };
 
-Tasks.AddTasksModal = function TasksAddTaskModal({ modalOpen = false, setModalOpen }) {
+Tasks.AddModal = function TasksAddModal({ modalOpen = false, setModalOpen }) {
   const theme = useTheme();
   const classes = useStyles(theme);
 
@@ -97,26 +98,27 @@ Tasks.AddTasksModal = function TasksAddTaskModal({ modalOpen = false, setModalOp
             <Close />
           </Button>
         </Toolbar>
-        <Tasks.AddTask forModal={true} setModalOpen={setModalOpen} />
+        <Tasks.Add forModal={true} setModalOpen={setModalOpen} />
       </Paper>
     </Modal>
   );
 };
 
-Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
+Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
   const theme = useTheme();
   const classes = useStyles(theme);
+
   const [addTaskActive, setAddTaskActive] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduleInput, setScheduleInput] = useState('');
+
   const [assignedProject, setAssignedProject] = useState(1);
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
-  const dispatch = useDispatch();
 
-  const handleSelectProject = () => {
-    setOpenProjectDialog(false);
-  };
+  const projects = useSelector(selectProjects);
+
+  const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -125,7 +127,7 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
       title: inputValue,
       isCompleted: false,
       dueDate: scheduleInput,
-      projectId: 1,
+      projectId: assignedProject,
       userId: 'BcwG2ysWo37vag',
       dateCreated: getServerDateTime(),
     };
@@ -219,22 +221,25 @@ Tasks.AddTask = function TasksAddTask({ forModal = false, setModalOpen }) {
                     startIcon={<Inbox style={{ color: '#246fe0' }} />}>
                     Inbox
                   </Button>
+
                   <Dialog open={openProjectDialog} onClose={() => setOpenProjectDialog(false)}>
                     <DialogTitle>Select assigned project</DialogTitle>
                     <DialogContent>
                       <Select
+                        fullWidth
                         native
                         value={assignedProject}
                         onChange={({ target }) => setAssignedProject(target.value)}
                         input={<Input />}>
-                        <option value={1}>One</option>
-                        <option value={2}>Two</option>
-                        <option value={3}>Three</option>
+                        <option value={1}>Inbox</option>
+                        {projects.map((project) => (
+                          <option value={project.id}> {project.name}</option>
+                        ))}
                       </Select>
                     </DialogContent>
                     <DialogActions>
                       <Button onClick={() => setOpenProjectDialog(false)}>Cancel</Button>
-                      <Button onClick={handleSelectProject} color='primary'>
+                      <Button onClick={() => setOpenProjectDialog(false)} color='primary'>
                         <strong>Select</strong>
                       </Button>
                     </DialogActions>
