@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Container,
@@ -28,7 +28,7 @@ import { useTheme } from '@material-ui/core/styles';
 import { Add, Inbox, CheckCircleOutlined, RadioButtonUncheckedOutlined, Schedule, Close, FiberManualRecord } from '@material-ui/icons';
 import clsx from 'clsx';
 import useStyles from './tasksStyles';
-import { selectPendingTasks, addTask, completeTask } from './tasksSlice';
+import { selectPendingTasks, selectUpcomingTasks,  selectPendingTasksToday , addTask, completeTask } from './tasksSlice';
 import { ToggleButton } from '@material-ui/lab';
 import { getDateToday, getServerDateTime } from '../../helpers';
 import { selectProjects } from '../projects/projectsSlice';
@@ -55,15 +55,32 @@ Tasks.List = function TasksList() {
   const classes = useStyles(theme);
   const dispatch = useDispatch();
   const { selectedTaskFilter } = useContext(AppContext);
-  const tasks = useSelector(selectPendingTasks).filter( (task) => task.projectId === selectedTaskFilter);
+  const tasks = useSelector(selectPendingTasks);
+  const tasksToday = useSelector(selectPendingTasksToday);
+  const tasksUpcoming = useSelector(selectUpcomingTasks);
+
+  const getFilteredTasks = () => {
+    switch(selectedTaskFilter){
+      case 'TODAY':
+        return tasksToday;
+
+      case 'UPCOMING':
+        return tasksUpcoming;
+
+      default:
+        return tasks.filter( (task) => task.projectId === selectedTaskFilter);
+    }
+  }
+
 
   const handleCompleteTask = (taskId) => {
     dispatch(completeTask(taskId));
   };
 
+
   return (
     <List className={classes.list}>
-      {tasks.map((task) => (
+      {getFilteredTasks().map((task) => (
         <ListItem className={classes.listItem} key={task.id} button disableRipple onClick={() => {}}>
           <ListItemIcon className={classes.listItemIcon}>
             <Checkbox
@@ -111,19 +128,26 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
   const theme = useTheme();
   const classes = useStyles(theme);
 
-  
   const { addTaskActive, setAddTaskActive, selectedTaskFilter } = useContext(AppContext);
 
   const [inputValue, setInputValue] = useState('');
   const [isScheduled, setIsScheduled] = useState(false);
-  const [scheduleInput, setScheduleInput] = useState('');
+  const [scheduleInput, setScheduleInput] = useState(getDateToday());
 
-  const [assignedProject, setAssignedProject] = useState('INBOX');
+  const [assignedProject, setAssignedProject] = useState( 'INBOX' );
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
 
   const projects = useSelector(selectProjects);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+
+  selectedTaskFilter === 'TODAY' || selectedTaskFilter === 'UPCOMING' ? setAssignedProject('INBOX') : 
+    setAssignedProject(selectedTaskFilter);
+    
+  }, [selectedTaskFilter])
+
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
 

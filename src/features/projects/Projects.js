@@ -26,7 +26,7 @@ import { getServerDateTime } from '../../helpers';
 import { addProject, selectProjects } from './projectsSlice';
 import useStyles from './projectsStyles';
 import AppContext from '../../app/context';
-import { selectPendingTasks } from '../tasks/tasksSlice';
+import { selectPendingTasks, selectPendingTasksToday, selectUpcomingTasks } from '../tasks/tasksSlice';
 const ProjectsContext = createContext();
 
 export default function Projects({ ...props }) {
@@ -48,12 +48,28 @@ export default function Projects({ ...props }) {
 Projects.Filters = function ProjectsFilter({ ...props }) {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const { setAddTaskActive,setPageTitle, selectedTaskFilter, setSelectedTaskFilter } = useContext(AppContext);
+  const { setAddTaskActive, setPageTitle, selectedTaskFilter, setSelectedTaskFilter } = useContext(AppContext);
+  const tasks = useSelector(selectPendingTasks);
+  const tasksToday = useSelector(selectPendingTasksToday);
+  const tasksUpcoming = useSelector(selectUpcomingTasks);
 
   const handleFilterChange = (filter) => {
     setPageTitle(filter.name)
     setSelectedTaskFilter(filter.key);
     setAddTaskActive( false );
+  }
+
+  const getTaskCount = ({key}) => {
+    switch(key){
+      case 'INBOX':
+        return tasks.filter(task=>task.projectId === 'INBOX').length;
+      case 'TODAY':
+        return tasksToday.length;
+      case 'UPCOMING':
+        return tasksUpcoming.length;
+      default:
+        return '';
+    }
   }
   return (
     <List component='nav' className={classes.list} {...props}>
@@ -69,7 +85,7 @@ Projects.Filters = function ProjectsFilter({ ...props }) {
           </ListItemAvatar>
           <ListItemText disableTypography className={classes.listItemText} primary={filter.name} />
           <ListItemSecondaryAction>
-            <Typography className={classes.listItemSecondaryAction}>1</Typography>
+            <Typography className={classes.listItemSecondaryAction}>{ getTaskCount(filter)}</Typography>
           </ListItemSecondaryAction>
         </ListItem>
       ))}
@@ -86,6 +102,9 @@ Projects.Add = function ProjectsAdd({ ...props }) {
   const { projectCollapsed, setProjectCollapsed } = useContext(ProjectsContext);
 
   const dispatch = useDispatch();
+
+  
+
 
   const handleAddProject = () => {
     const project = {
@@ -149,6 +168,10 @@ Projects.Listing = function ProjectsListing({ ...props }) {
   const { setPageTitle,setAddTaskActive } = useContext(AppContext);
   const { projectCollapsed, selectedTaskFilter, setSelectedTaskFilter } = useContext(ProjectsContext);
 
+  const projectTasksCount = (projId) => {
+    return tasks.filter( task => task.projectId === projId ).length;
+  }
+
   const handleFilterChange = ({id, name}) => {
     setSelectedTaskFilter(id);
     setPageTitle(name);
@@ -171,7 +194,7 @@ Projects.Listing = function ProjectsListing({ ...props }) {
             <ListItemText className={classes.listItemText} disableTypography primary={project.name} />
             <ListItemSecondaryAction>
               <Typography className={classes.listItemSecondaryAction}>
-                { tasks.filter( task => task.projectId === project.id )?.length }
+                { projectTasksCount(project.id) > 0 ? projectTasksCount(project.id) : '' }
               </Typography>
             </ListItemSecondaryAction>
           </ListItem>
