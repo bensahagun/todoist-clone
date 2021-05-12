@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Container,
@@ -25,13 +25,15 @@ import {
   DialogActions,
 } from '@material-ui/core';
 import { useTheme } from '@material-ui/core/styles';
-import { Add, Inbox, CheckCircleOutlined, RadioButtonUncheckedOutlined, Schedule, Close } from '@material-ui/icons';
+import { Add, Inbox, CheckCircleOutlined, RadioButtonUncheckedOutlined, Schedule, Close, FiberManualRecord } from '@material-ui/icons';
 import clsx from 'clsx';
 import useStyles from './tasksStyles';
 import { selectPendingTasks, addTask, completeTask } from './tasksSlice';
 import { ToggleButton } from '@material-ui/lab';
 import { getDateToday, getServerDateTime } from '../../helpers';
 import { selectProjects } from '../projects/projectsSlice';
+import { taskFilters} from '../../app/fixtures';
+import AppContext from '../../app/context';
 
 export default function Tasks({ ...props }) {
   const theme = useTheme();
@@ -51,8 +53,9 @@ export default function Tasks({ ...props }) {
 Tasks.List = function TasksList() {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const tasks = useSelector(selectPendingTasks);
   const dispatch = useDispatch();
+  const { selectedTaskFilter } = useContext(AppContext);
+  const tasks = useSelector(selectPendingTasks).filter( (task) => task.projectId === selectedTaskFilter);
 
   const handleCompleteTask = (taskId) => {
     dispatch(completeTask(taskId));
@@ -108,16 +111,17 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
   const theme = useTheme();
   const classes = useStyles(theme);
 
-  const [addTaskActive, setAddTaskActive] = useState(false);
+  
+  const { addTaskActive, setAddTaskActive, selectedTaskFilter } = useContext(AppContext);
+
   const [inputValue, setInputValue] = useState('');
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduleInput, setScheduleInput] = useState('');
 
-  const [assignedProject, setAssignedProject] = useState(1);
+  const [assignedProject, setAssignedProject] = useState('INBOX');
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
 
   const projects = useSelector(selectProjects);
-
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
@@ -143,6 +147,10 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
     setAddTaskActive(false);
     forModal && setModalOpen(false);
   };
+
+  const handleDialogClose = () => {
+     setOpenProjectDialog(false);
+  }
 
   return (
     <Box className={clsx(classes.addTask, forModal && classes.addTaskForModal)}>
@@ -210,6 +218,7 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
                   </Grid>
                 )}
                 <Grid item>
+                  
                   <Button
                     disableRipple
                     variant='outlined'
@@ -218,11 +227,12 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
                       root: classes.addTaskOptionButton,
                       startIcon: classes.addTaskOptionIcons,
                     }}
-                    startIcon={<Inbox style={{ color: '#246fe0' }} />}>
-                    Inbox
+                    startIcon={ assignedProject === 'INBOX' ? <Inbox style={{ color: '#246fe0' }} /> : <FiberManualRecord/>}>
+                   
+                    { assignedProject === 'INBOX' ? 'Inbox' : projects.find(project => project.id === assignedProject).name}
                   </Button>
 
-                  <Dialog open={openProjectDialog} onClose={() => setOpenProjectDialog(false)}>
+                  <Dialog open={openProjectDialog} onClose={ handleDialogClose }>
                     <DialogTitle>Select assigned project</DialogTitle>
                     <DialogContent>
                       <Select
@@ -231,9 +241,9 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
                         value={assignedProject}
                         onChange={({ target }) => setAssignedProject(target.value)}
                         input={<Input />}>
-                        <option value={1}>Inbox</option>
+                        <option value='INBOX'>Inbox</option>
                         {projects.map((project) => (
-                          <option value={project.id}> {project.name}</option>
+                          <option value={project.id} > {project.name}</option>
                         ))}
                       </Select>
                     </DialogContent>

@@ -25,12 +25,13 @@ import { taskFilters } from '../../app/fixtures';
 import { getServerDateTime } from '../../helpers';
 import { addProject, selectProjects } from './projectsSlice';
 import useStyles from './projectsStyles';
-
+import AppContext from '../../app/context';
+import { selectPendingTasks } from '../tasks/tasksSlice';
 const ProjectsContext = createContext();
 
 export default function Projects({ ...props }) {
   const [projectCollapsed, setProjectCollapsed] = useState(true);
-  const [selectedTaskFilter, setSelectedTaskFilter] = useState(taskFilters[0].name);
+  const {selectedTaskFilter, setSelectedTaskFilter} = useContext(AppContext);
 
   return (
     <ProjectsContext.Provider
@@ -47,8 +48,13 @@ export default function Projects({ ...props }) {
 Projects.Filters = function ProjectsFilter({ ...props }) {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const { selectedTaskFilter, setSelectedTaskFilter } = useContext(ProjectsContext);
+  const { setAddTaskActive,setPageTitle, selectedTaskFilter, setSelectedTaskFilter } = useContext(AppContext);
 
+  const handleFilterChange = (filter) => {
+    setPageTitle(filter.name)
+    setSelectedTaskFilter(filter.key);
+    setAddTaskActive( false );
+  }
   return (
     <List component='nav' className={classes.list} {...props}>
       {taskFilters.map((filter) => (
@@ -56,7 +62,7 @@ Projects.Filters = function ProjectsFilter({ ...props }) {
           button
           key={filter.key}
           className={classes.listItem}
-          onClick={() => setSelectedTaskFilter(filter.key)}
+          onClick={() => handleFilterChange(filter)}
           selected={filter.key === selectedTaskFilter}>
           <ListItemAvatar className={classes.listItemAvatar} style={{ color: filter.color }}>
             {filter.icon}
@@ -137,17 +143,24 @@ Projects.Add = function ProjectsAdd({ ...props }) {
 
 Projects.Listing = function ProjectsListing({ ...props }) {
   const projects = useSelector(selectProjects);
-
+  const tasks = useSelector(selectPendingTasks);
   const theme = useTheme();
   const classes = useStyles(theme);
+  const { setPageTitle,setAddTaskActive } = useContext(AppContext);
   const { projectCollapsed, selectedTaskFilter, setSelectedTaskFilter } = useContext(ProjectsContext);
+
+  const handleFilterChange = ({id, name}) => {
+    setSelectedTaskFilter(id);
+    setPageTitle(name);
+    setAddTaskActive( false );
+  }
 
   return (
     <Collapse in={projectCollapsed} {...props}>
       <List component='nav'>
         {projects.map((project) => (
           <ListItem
-            onClick={() => setSelectedTaskFilter(project.id)}
+            onClick={() => handleFilterChange(project)}
             key={project.name}
             button
             className={classes.listItem}
@@ -157,7 +170,9 @@ Projects.Listing = function ProjectsListing({ ...props }) {
             </ListItemAvatar>
             <ListItemText className={classes.listItemText} disableTypography primary={project.name} />
             <ListItemSecondaryAction>
-              <Typography className={classes.listItemSecondaryAction}>1</Typography>
+              <Typography className={classes.listItemSecondaryAction}>
+                { tasks.filter( task => task.projectId === project.id )?.length }
+              </Typography>
             </ListItemSecondaryAction>
           </ListItem>
         ))}

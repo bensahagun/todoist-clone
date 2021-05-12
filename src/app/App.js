@@ -11,15 +11,17 @@ import { selectProjects } from '../features/projects/projectsSlice';
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedTaskFilter, setSelectedTaskFilter] = useState(taskFilters[0].key);
+  const [addTaskActive, setAddTaskActive] = useState(false);
+  const [pageTitle, setPageTitle] = useState(taskFilters[0].name);
   const projects = useSelector(selectProjects);
 
   return (
-    <AppContext.Provider value={{ sidebarOpen, setSidebarOpen, selectedTaskFilter, setSelectedTaskFilter }}>
+    <AppContext.Provider value={{ addTaskActive, setAddTaskActive, setPageTitle, sidebarOpen, setSidebarOpen, selectedTaskFilter, setSelectedTaskFilter }}>
       <div className='app' style={{ display: 'flex' }}>
         <Header setSidebarOpen={setSidebarOpen} />
         <Sidebar sidebarOpen={sidebarOpen} />
         <Content>
-          <Content.Header title='Inbox' />
+          <Content.Header title={pageTitle} />
           <Content.Body>
             <Tasks projects={projects} />
           </Content.Body>
