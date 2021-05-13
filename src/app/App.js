@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { createMuiTheme, StylesProvider, ThemeProvider } from '@material-ui/core/styles';
+import { CssBaseline } from '@material-ui/core';
 import Content from '../components/Content';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
@@ -24,7 +25,7 @@ function App() {
     [prefersDarkMode]
   );
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 600);
   const [selectedTaskFilter, setSelectedTaskFilter] = useState(taskFilters[0].key);
   const [addTaskActive, setAddTaskActive] = useState(false);
   const [pageTitle, setPageTitle] = useState(taskFilters[0].name);
@@ -44,6 +45,7 @@ function App() {
             selectedTaskFilter,
             setSelectedTaskFilter,
           }}>
+          <CssBaseline />
           <div className='app' style={{ display: 'flex' }}>
             <Header setSidebarOpen={setSidebarOpen} />
             <Sidebar sidebarOpen={sidebarOpen} />

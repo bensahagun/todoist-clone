@@ -3,7 +3,10 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
   root: {},
   container: {
-    padding: theme.spacing(0, 8),
+    padding: theme.spacing(0, 2),
+    [theme.breakpoints.up('sm')]: {
+      padding: theme.spacing(0, 8),
+    },
   },
   addTask: {},
   addTaskContainer: {
@@ -139,7 +142,10 @@ const useStyles = makeStyles((theme) => ({
   },
   addTaskModalPaper: {
     position: 'absolute',
-    width: 550,
+    width: '90%',
+    [theme.breakpoints.up('sm')]: {
+      width: 550,
+    },
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(1, 3, 1),
     '&:focus': {

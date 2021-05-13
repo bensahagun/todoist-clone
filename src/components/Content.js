@@ -19,7 +19,10 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: -theme.custom.sidebarWidth,
   },
   container: {
-    padding: theme.spacing(4, 8, 0),
+    padding: theme.spacing(2, 2),
+    [theme.breakpoints.up('sm')]: {
+      padding: theme.spacing(4, 8, 0),
+    },
   },
   headerGrid: {},
   headerTitle: {

@@ -130,12 +130,17 @@ Tasks.List = function TasksList() {
           </ListItem>
         ))}
       </List>
-      <Tasks.EditModal taskId={editTaskId} editModalOpen={editModalOpen} setEditModalOpen={setEditModalOpen} />
+      <Tasks.EditModal
+        taskId={editTaskId}
+        editModalOpen={editModalOpen}
+        setEditModalOpen={setEditModalOpen}
+        cancelCallback={() => {}}
+      />
     </>
   );
 };
 
-Tasks.EditModal = function TasksEditModal({ taskId, editModalOpen, setEditModalOpen }) {
+Tasks.EditModal = function TasksEditModal({ taskId, editModalOpen, setEditModalOpen, cancelCallback }) {
   const theme = useTheme();
   const classes = useStyles(theme);
 
@@ -161,6 +166,11 @@ Tasks.EditModal = function TasksEditModal({ taskId, editModalOpen, setEditModalO
     });
   };
 
+  const handleCancel = () => {
+    setEditModalOpen(false);
+    cancelCallback();
+  };
+
   return task ? (
     <Modal className={classes.addTaskModal} open={editModalOpen} aria-labelledby='Edit task'>
       <Paper className={classes.addTaskModalPaper} elevation={1}>
@@ -168,7 +178,7 @@ Tasks.EditModal = function TasksEditModal({ taskId, editModalOpen, setEditModalO
           <Typography>
             <strong>Edit Task</strong>
           </Typography>
-          <Button onClick={() => setEditModalOpen(false)} className={classes.addTaskModalClose} size='small'>
+          <Button onClick={handleCancel} className={classes.addTaskModalClose} size='small'>
             <Close />
           </Button>
         </Toolbar>
@@ -186,7 +196,7 @@ Tasks.EditModal = function TasksEditModal({ taskId, editModalOpen, setEditModalO
         <Divider />
         <Grid style={{ marginTop: '0.25rem' }} container justify='flex-end'>
           <Grid>
-            <Button onClick={() => setEditModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleCancel}>Cancel</Button>
           </Grid>
           <Grid>
             <Button onClick={handleSaveEdit} color='primary'>
@@ -363,7 +373,10 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
                         input={<Input />}>
                         <option value='INBOX'>Inbox</option>
                         {projects.map((project) => (
-                          <option value={project.id}> {project.name}</option>
+                          <option key={project.id} value={project.id}>
+                            {' '}
+                            {project.name}
+                          </option>
                         ))}
                       </Select>
                     </DialogContent>

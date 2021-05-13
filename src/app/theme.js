@@ -26,6 +26,9 @@ export const themeSettings = {
         html: {
           overflow: 'hidden',
         },
+        body: {
+          overflow: 'hidden',
+        },
       },
     },
     MuiAppBar: {

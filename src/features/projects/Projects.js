@@ -31,7 +31,7 @@ const ProjectsContext = createContext();
 
 export default function Projects({ ...props }) {
   const [projectCollapsed, setProjectCollapsed] = useState(true);
-  const {selectedTaskFilter, setSelectedTaskFilter} = useContext(AppContext);
+  const { selectedTaskFilter, setSelectedTaskFilter } = useContext(AppContext);
 
   return (
     <ProjectsContext.Provider
@@ -48,21 +48,23 @@ export default function Projects({ ...props }) {
 Projects.Filters = function ProjectsFilter({ ...props }) {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const { setAddTaskActive, setPageTitle, selectedTaskFilter, setSelectedTaskFilter } = useContext(AppContext);
+  const { setAddTaskActive, setPageTitle, selectedTaskFilter, setSelectedTaskFilter, setSidebarOpen } =
+    useContext(AppContext);
   const tasks = useSelector(selectPendingTasks);
   const tasksToday = useSelector(selectPendingTasksToday);
   const tasksUpcoming = useSelector(selectUpcomingTasks);
 
   const handleFilterChange = (filter) => {
-    setPageTitle(filter.name)
+    setPageTitle(filter.name);
     setSelectedTaskFilter(filter.key);
-    setAddTaskActive( false );
-  }
+    setAddTaskActive(false);
+    if (window.innerWidth < 600) setSidebarOpen(false);
+  };
 
-  const getTaskCount = ({key}) => {
-    switch(key){
+  const getTaskCount = ({ key }) => {
+    switch (key) {
       case 'INBOX':
-        return tasks.filter(task=>task.projectId === 'INBOX').length;
+        return tasks.filter((task) => task.projectId === 'INBOX').length;
       case 'TODAY':
         return tasksToday.length;
       case 'UPCOMING':
@@ -70,7 +72,7 @@ Projects.Filters = function ProjectsFilter({ ...props }) {
       default:
         return '';
     }
-  }
+  };
   return (
     <List component='nav' className={classes.list} {...props}>
       {taskFilters.map((filter) => (
@@ -85,7 +87,7 @@ Projects.Filters = function ProjectsFilter({ ...props }) {
           </ListItemAvatar>
           <ListItemText disableTypography className={classes.listItemText} primary={filter.name} />
           <ListItemSecondaryAction>
-            <Typography className={classes.listItemSecondaryAction}>{ getTaskCount(filter)}</Typography>
+            <Typography className={classes.listItemSecondaryAction}>{getTaskCount(filter)}</Typography>
           </ListItemSecondaryAction>
         </ListItem>
       ))}
@@ -102,9 +104,6 @@ Projects.Add = function ProjectsAdd({ ...props }) {
   const { projectCollapsed, setProjectCollapsed } = useContext(ProjectsContext);
 
   const dispatch = useDispatch();
-
-  
-
 
   const handleAddProject = () => {
     const project = {
@@ -165,18 +164,20 @@ Projects.Listing = function ProjectsListing({ ...props }) {
   const tasks = useSelector(selectPendingTasks);
   const theme = useTheme();
   const classes = useStyles(theme);
-  const { setPageTitle,setAddTaskActive } = useContext(AppContext);
+  const { setPageTitle, setAddTaskActive, setSidebarOpen } = useContext(AppContext);
   const { projectCollapsed, selectedTaskFilter, setSelectedTaskFilter } = useContext(ProjectsContext);
 
   const projectTasksCount = (projId) => {
-    return tasks.filter( task => task.projectId === projId ).length;
-  }
+    return tasks.filter((task) => task.projectId === projId).length;
+  };
 
-  const handleFilterChange = ({id, name}) => {
+  const handleFilterChange = ({ id, name }) => {
     setSelectedTaskFilter(id);
     setPageTitle(name);
-    setAddTaskActive( false );
-  }
+    setAddTaskActive(false);
+
+    if (window.innerWidth < 600) setSidebarOpen(false);
+  };
 
   return (
     <Collapse in={projectCollapsed} {...props}>
@@ -194,7 +195,7 @@ Projects.Listing = function ProjectsListing({ ...props }) {
             <ListItemText className={classes.listItemText} disableTypography primary={project.name} />
             <ListItemSecondaryAction>
               <Typography className={classes.listItemSecondaryAction}>
-                { projectTasksCount(project.id) > 0 ? projectTasksCount(project.id) : '' }
+                {projectTasksCount(project.id) > 0 ? projectTasksCount(project.id) : ''}
               </Typography>
             </ListItemSecondaryAction>
           </ListItem>

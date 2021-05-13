@@ -15,7 +15,10 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0, 1),
   },
   drawerPaper: {
-    width: theme.custom.sidebarWidth,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: theme.custom.sidebarWidth,
+    },
     backgroundColor: theme.palette.background.default,
     borderRight: 'none',
     paddingTop: 35,
