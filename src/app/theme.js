@@ -1,13 +1,11 @@
-import { createMuiTheme } from '@material-ui/core/styles';
-
-export const theme = createMuiTheme({
+export const themeSettings = {
   palette: {
     primary: {
       main: '#db4c3f',
       dark: '#d1332b',
     },
     secondary: {
-      main: '#ffffff',
+      main: '#212121',
       dark: '#333',
     },
   },
@@ -30,5 +28,10 @@ export const theme = createMuiTheme({
         },
       },
     },
+    MuiAppBar: {
+      colorPrimary: {
+        backgroundColor: '#db4c3f',
+      },
+    },
   },
-});
+};

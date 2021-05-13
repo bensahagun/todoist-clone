@@ -39,21 +39,26 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.grey[700],
     },
     '&$switchChecked + $switchTrack': {
-      backgroundColor: theme.palette.grey[700],
+      backgroundColor: theme.palette.grey[500],
     },
   },
   switchChecked: {},
   switchTrack: {},
+  switchIcon: {
+    verticalAlign: 'middle',
+    color: theme.palette.common.white,
+  },
 }));
 
 export default function Header() {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const { sidebarOpen, setSidebarOpen } = useContext(AppContext);
+  const { sidebarOpen, setSidebarOpen, prefersDarkMode, setPrefersDarkMode } = useContext(AppContext);
   const [modalOpen, setModalOpen] = useState(false);
+  const [appBarColor, setAppBarColor] = useState('primary');
 
   return (
-    <AppBar elevation={0} className={classes.appBar}>
+    <AppBar color={appBarColor} elevation={0} className={classes.appBar}>
       <Toolbar className={classes.toolbar}>
         <Grid container justify='space-between' alignItems='center'>
           <Grid item>
@@ -86,16 +91,21 @@ export default function Header() {
             <Tasks.AddModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
 
             <Grid component='label'>
-              <WbSunny fontSize='small' style={{ verticalAlign: 'middle' }} />
+              <WbSunny className={classes.switchIcon} fontSize='small' />
               <Switch
                 size='small'
+                checked={prefersDarkMode}
+                onChange={({ target }) => {
+                  setAppBarColor(target.checked ? 'secondary' : 'primary');
+                  setPrefersDarkMode(target.checked);
+                }}
                 classes={{
                   switchBase: classes.switchBase,
                   track: classes.switchTrack,
                   checked: classes.switchChecked,
                 }}
               />
-              <NightsStay fontSize='small' style={{ verticalAlign: 'middle' }} />
+              <NightsStay className={classes.switchIcon} fontSize='small' />
             </Grid>
           </Grid>
         </Grid>

@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '0.9rem',
     justifyContent: 'flex-start',
     textTransform: 'initial',
-    color: theme.palette.grey[600],
+    color: theme.palette.text.primary,
     '&:hover': {
       backgroundColor: 'transparent',
       color: theme.palette.primary.main,
@@ -106,6 +106,9 @@ const useStyles = makeStyles((theme) => ({
     '&:hover, &:focus': {
       backgroundColor: 'transparent',
     },
+    '&:hover + $listItemEdit': {
+      display: 'block',
+    },
   },
   listItemIcon: {
     minWidth: 30,
@@ -113,7 +116,14 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0.5),
   },
   listItemText: {
+    color: theme.palette.text.primary,
     fontSize: '0.9rem',
+  },
+  listItemEdit: {
+    display: 'none',
+    '&:hover': {
+      display: 'block',
+    },
   },
   addTaskModal: {
     display: 'flex',

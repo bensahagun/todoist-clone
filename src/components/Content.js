@@ -22,6 +22,10 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4, 8, 0),
   },
   headerGrid: {},
+  headerTitle: {
+    color: theme.palette.text.primary,
+    fontWeight: 500,
+  },
 }));
 
 export default function Content({ children }) {
@@ -42,8 +46,8 @@ Content.Header = function ContentHeader({ title, children, ...props }) {
       <Container className={classes.container} maxWidth='md'>
         <Grid className={classes.headerGrid} container alignContent='space-between'>
           <Grid item xs>
-            <Typography component='h1' variant='h5'>
-              <Box fontWeight='600'>{title}</Box>
+            <Typography className={classes.headerTitle} component='h1' variant='h5'>
+              {title}
             </Typography>
           </Grid>
           <Grid item>

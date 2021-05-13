@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { db } from '../../firebase';
-import { getDateToday } from '../../helpers';
 
 const initialState = [];
 
@@ -30,6 +29,16 @@ export const addTask = createAsyncThunk('firebase/addTask', async (task) => {
   return response;
 });
 
+export const editTask = createAsyncThunk('firebase/editTask', async (task) => {
+  const response = await db
+    .collection('tasks')
+    .doc(task.id)
+    .update({ title: task.title })
+    .then(() => ({ id: task.id, title: task.title }));
+
+  return response;
+});
+
 export const completeTask = createAsyncThunk('firebase/completeTask', async (taskId) => {
   await db.collection('tasks').doc(taskId).update({
     isCompleted: true,
@@ -49,6 +58,11 @@ export const tasksSlice = createSlice({
     [addTask.fulfilled]: (state, action) => {
       state.push(action.payload);
     },
+    [editTask.fulfilled]: (state, { payload }) => {
+      state.forEach((task) => {
+        if (task.id === payload.id) task.title = payload.title;
+      });
+    },
     [completeTask.fulfilled]: (state, action) => {
       state.forEach((task) => {
         if (task.id === action.payload) task.isCompleted = true;
@@ -60,27 +74,26 @@ export const tasksSlice = createSlice({
 export const selectTasks = (state) => state.tasks;
 export const selectCompletedTasks = (state) => state.tasks.filter((task) => task.isCompleted);
 export const selectPendingTasks = (state) => state.tasks.filter((task) => !task.isCompleted);
-export const selectPendingTasksToday = (state) => state.tasks.filter((task) => {
-  
-  if( task.dueDate === '' || task.dueDate === undefined || task.isCompleted) return false;
- 
-  const date = new Date(task.dueDate);
-  const filterStart = (new Date()).setHours(0,0,0);
-  const filterEnd = new Date();
+export const selectPendingTasksToday = (state) =>
+  state.tasks.filter((task) => {
+    if (task.dueDate === '' || task.dueDate === undefined || task.isCompleted) return false;
 
-  console.log(date, filterStart, filterEnd);
+    const date = new Date(task.dueDate);
+    const filterStart = new Date().setHours(0, 0, 0);
+    const filterEnd = new Date();
 
-  return ( date >= filterStart && date <= filterEnd);
-});
+    return date >= filterStart && date <= filterEnd;
+  });
 
-export const selectUpcomingTasks = (state) => state.tasks.filter((task) => {
-  if( task.dueDate === '' || task.dueDate === undefined || task.isCompleted) return false;
+export const selectUpcomingTasks = (state) =>
+  state.tasks.filter((task) => {
+    if (task.dueDate === '' || task.dueDate === undefined || task.isCompleted) return false;
 
-  const date = new Date(task.dueDate);
-  const filterStart = (new Date()).setHours(24,60,60);
+    const date = new Date(task.dueDate);
+    const filterStart = new Date().setHours(24, 60, 60);
 
-  return (date >= filterStart);
-});
+    return date >= filterStart;
+  });
 
 // export const { addTask } = tasksSlice.actions;
 

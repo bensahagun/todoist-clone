@@ -23,16 +23,34 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  ListItemSecondaryAction,
+  Divider,
 } from '@material-ui/core';
 import { useTheme } from '@material-ui/core/styles';
-import { Add, Inbox, CheckCircleOutlined, RadioButtonUncheckedOutlined, Schedule, Close, FiberManualRecord } from '@material-ui/icons';
+import {
+  Add,
+  Inbox,
+  CheckCircleOutlined,
+  RadioButtonUncheckedOutlined,
+  Schedule,
+  Close,
+  FiberManualRecord,
+  MoreHoriz,
+} from '@material-ui/icons';
 import clsx from 'clsx';
 import useStyles from './tasksStyles';
-import { selectPendingTasks, selectUpcomingTasks,  selectPendingTasksToday , addTask, completeTask } from './tasksSlice';
+import {
+  selectTasks,
+  selectPendingTasks,
+  selectUpcomingTasks,
+  selectPendingTasksToday,
+  addTask,
+  completeTask,
+  editTask,
+} from './tasksSlice';
 import { ToggleButton } from '@material-ui/lab';
-import { getDateToday, getServerDateTime } from '../../helpers';
+import { formatDate, getDateToday, getServerDateTime } from '../../helpers';
 import { selectProjects } from '../projects/projectsSlice';
-import { taskFilters} from '../../app/fixtures';
 import AppContext from '../../app/context';
 
 export default function Tasks({ ...props }) {
@@ -44,7 +62,6 @@ export default function Tasks({ ...props }) {
       <Container maxWidth='md' className={classes.container}>
         <Tasks.List />
         <Tasks.Add />
-        <Tasks.AddModal />
       </Container>
     </Box>
   );
@@ -58,9 +75,11 @@ Tasks.List = function TasksList() {
   const tasks = useSelector(selectPendingTasks);
   const tasksToday = useSelector(selectPendingTasksToday);
   const tasksUpcoming = useSelector(selectUpcomingTasks);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editTaskId, setEditTaskId] = useState();
 
   const getFilteredTasks = () => {
-    switch(selectedTaskFilter){
+    switch (selectedTaskFilter) {
       case 'TODAY':
         return tasksToday;
 
@@ -68,39 +87,116 @@ Tasks.List = function TasksList() {
         return tasksUpcoming;
 
       default:
-        return tasks.filter( (task) => task.projectId === selectedTaskFilter);
+        return tasks.filter((task) => task.projectId === selectedTaskFilter);
     }
-  }
-
+  };
 
   const handleCompleteTask = (taskId) => {
     dispatch(completeTask(taskId));
   };
 
+  const handleEditTask = (taskId) => {
+    setEditTaskId(taskId);
+    setEditModalOpen(true);
+  };
 
   return (
-    <List className={classes.list}>
-      {getFilteredTasks().map((task) => (
-        <ListItem className={classes.listItem} key={task.id} button disableRipple onClick={() => {}}>
-          <ListItemIcon className={classes.listItemIcon}>
-            <Checkbox
-              onChange={({ target }) => target.checked && handleCompleteTask(task.id)}
-              color='default'
-              checkedIcon={<CheckCircleOutlined />}
-              icon={<RadioButtonUncheckedOutlined />}
-              edge='start'
-              inputProps={{ 'aria-labelledby': task.id }}
+    <>
+      <List className={classes.list}>
+        {getFilteredTasks().map((task) => (
+          <ListItem className={classes.listItem} key={task.id} button disableRipple>
+            <ListItemIcon className={classes.listItemIcon}>
+              <Checkbox
+                onChange={({ target }) => target.checked && handleCompleteTask(task.id)}
+                color='default'
+                checkedIcon={<CheckCircleOutlined />}
+                icon={<RadioButtonUncheckedOutlined />}
+                edge='start'
+                inputProps={{ 'aria-labelledby': task.id }}
+              />
+            </ListItemIcon>
+            <ListItemText
+              onClick={() => handleEditTask(task.id)}
+              className={classes.listItemText}
+              id={task.id}
+              primary={task.title}
+              secondary={task.dueDate && selectedTaskFilter !== 'TODAY' && formatDate(task.dueDate)}
             />
-          </ListItemIcon>
-          <ListItemText
-            disableTypography
-            className={classes.listItemText}
-            id={task.id}
-            primary={task.title}></ListItemText>
-        </ListItem>
-      ))}
-    </List>
+            <ListItemSecondaryAction className={classes.listItemEdit} style={{ right: 0 }}>
+              <Button onClick={() => handleEditTask(task.id)} style={{ minWidth: 20 }}>
+                <MoreHoriz />
+              </Button>
+            </ListItemSecondaryAction>
+          </ListItem>
+        ))}
+      </List>
+      <Tasks.EditModal taskId={editTaskId} editModalOpen={editModalOpen} setEditModalOpen={setEditModalOpen} />
+    </>
   );
+};
+
+Tasks.EditModal = function TasksEditModal({ taskId, editModalOpen, setEditModalOpen }) {
+  const theme = useTheme();
+  const classes = useStyles(theme);
+
+  const tasks = useSelector(selectTasks);
+  const task = tasks.filter((task) => task.id === taskId)[0];
+  const [inputValue, setInputValue] = useState();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    task && setInputValue(task.title);
+  }, [task]);
+
+  const handleSaveEdit = () => {
+    const payload = {
+      id: task.id,
+      title: inputValue,
+    };
+
+    dispatch(editTask(payload)).then(() => {
+      setInputValue('');
+      setEditModalOpen(false);
+    });
+  };
+
+  return task ? (
+    <Modal className={classes.addTaskModal} open={editModalOpen} aria-labelledby='Edit task'>
+      <Paper className={classes.addTaskModalPaper} elevation={1}>
+        <Toolbar className={classes.addTaskModalToolbar} disableGutters={true}>
+          <Typography>
+            <strong>Edit Task</strong>
+          </Typography>
+          <Button onClick={() => setEditModalOpen(false)} className={classes.addTaskModalClose} size='small'>
+            <Close />
+          </Button>
+        </Toolbar>
+        <Input
+          className={classes.addTaskInput}
+          autoFocus
+          value={inputValue}
+          onChange={({ target }) => {
+            setInputValue(target.value);
+          }}
+          type='text'
+          placeholder=''
+          fullWidth
+        />
+        <Divider />
+        <Grid style={{ marginTop: '0.25rem' }} container justify='flex-end'>
+          <Grid>
+            <Button onClick={() => setEditModalOpen(false)}>Cancel</Button>
+          </Grid>
+          <Grid>
+            <Button onClick={handleSaveEdit} color='primary'>
+              <strong>Confirm</strong>
+            </Button>
+          </Grid>
+        </Grid>
+      </Paper>
+    </Modal>
+  ) : null;
 };
 
 Tasks.AddModal = function TasksAddModal({ modalOpen = false, setModalOpen }) {
@@ -134,20 +230,18 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduleInput, setScheduleInput] = useState(getDateToday());
 
-  const [assignedProject, setAssignedProject] = useState( 'INBOX' );
+  const [assignedProject, setAssignedProject] = useState('INBOX');
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
 
   const projects = useSelector(selectProjects);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    selectedTaskFilter === 'TODAY' || selectedTaskFilter === 'UPCOMING'
+      ? setAssignedProject('INBOX')
+      : setAssignedProject(selectedTaskFilter);
+  }, [selectedTaskFilter]);
 
-  selectedTaskFilter === 'TODAY' || selectedTaskFilter === 'UPCOMING' ? setAssignedProject('INBOX') : 
-    setAssignedProject(selectedTaskFilter);
-    
-  }, [selectedTaskFilter])
-
- 
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -173,8 +267,8 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
   };
 
   const handleDialogClose = () => {
-     setOpenProjectDialog(false);
-  }
+    setOpenProjectDialog(false);
+  };
 
   return (
     <Box className={clsx(classes.addTask, forModal && classes.addTaskForModal)}>
@@ -242,7 +336,6 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
                   </Grid>
                 )}
                 <Grid item>
-                  
                   <Button
                     disableRipple
                     variant='outlined'
@@ -251,12 +344,15 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
                       root: classes.addTaskOptionButton,
                       startIcon: classes.addTaskOptionIcons,
                     }}
-                    startIcon={ assignedProject === 'INBOX' ? <Inbox style={{ color: '#246fe0' }} /> : <FiberManualRecord/>}>
-                   
-                    { assignedProject === 'INBOX' ? 'Inbox' : projects.find(project => project.id === assignedProject).name}
+                    startIcon={
+                      assignedProject === 'INBOX' ? <Inbox style={{ color: '#246fe0' }} /> : <FiberManualRecord />
+                    }>
+                    {assignedProject === 'INBOX'
+                      ? 'Inbox'
+                      : projects.find((project) => project.id === assignedProject).name}
                   </Button>
 
-                  <Dialog open={openProjectDialog} onClose={ handleDialogClose }>
+                  <Dialog open={openProjectDialog} onClose={handleDialogClose}>
                     <DialogTitle>Select assigned project</DialogTitle>
                     <DialogContent>
                       <Select
@@ -267,7 +363,7 @@ Tasks.Add = function TasksAdd({ forModal = false, setModalOpen }) {
                         input={<Input />}>
                         <option value='INBOX'>Inbox</option>
                         {projects.map((project) => (
-                          <option value={project.id} > {project.name}</option>
+                          <option value={project.id}> {project.name}</option>
                         ))}
                       </Select>
                     </DialogContent>
